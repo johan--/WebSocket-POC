@@ -8,6 +8,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.hosopy.actioncable.ActionCable;
 import com.hosopy.actioncable.ActionCableException;
 import com.hosopy.actioncable.Channel;
@@ -22,6 +23,8 @@ public class MainActivity extends AppCompatActivity {
     URI uri = null;
     EditText edtMensagem;
     Button btnEnviar;
+    Channel chatChannel;
+    Subscription subscription;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -36,7 +39,16 @@ public class MainActivity extends AppCompatActivity {
         btnEnviar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                String sendText = edtMensagem.getText().toString().trim();
+                if (sendText.length() > 0){
 
+                    JsonObject userValues = new JsonObject();
+                    userValues.addProperty("content", sendText);
+                    userValues.addProperty("room_id", "102");
+
+                    subscription.perform("send_message", userValues);
+                    Log.i("::CHECK", "ENVIANDO ...");
+                }
             }
         });
 
@@ -51,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         Consumer.Options options = new Consumer.Options();
+        options.reconnection = true;
 
         Map<String, String> headers = new HashMap<>();
         headers.put("token", "tokenkey");
@@ -58,11 +71,9 @@ public class MainActivity extends AppCompatActivity {
 
         Consumer consumer = ActionCable.createConsumer(uri, options);
 
-        Channel chatChannel = new Channel("ChatRoomsChannel");
-
-        Subscription subscription = consumer.getSubscriptions().create(chatChannel);
-
-        consumer.connect();
+        chatChannel = new Channel("ChatRoomsChannel");
+        chatChannel.addParam("room_id", "10");
+        subscription = consumer.getSubscriptions().create(chatChannel);
 
         subscription
                 .onConnected(new Subscription.ConnectedCallback() {
@@ -98,8 +109,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void call(ActionCableException e) {
                 Log.i("::CHECK", "onFailed");
+                Log.i("::CHECK", e.getMessage());
                 // Called when the subscription encounters any error
             }
         });
+
+        consumer.connect();
     }
 }
