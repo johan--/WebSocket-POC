@@ -19,11 +19,26 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ListView
+        <ImageView
+            android:id="@+id/statusdraw"
+            android:src="@drawable/status_off"
+            android:layout_width="match_parent"
+            android:layout_height="10dp" />
+
+        <ScrollView
             android:layout_weight="1"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-        </ListView>
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:id="@+id/info"
+                android:gravity="top"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+
+            </LinearLayout>
+        </ScrollView>
 
         <LinearLayout
             android:orientation="horizontal"
@@ -44,6 +59,5 @@
 
         </LinearLayout>
     </LinearLayout>
-
 
 </RelativeLayout>
