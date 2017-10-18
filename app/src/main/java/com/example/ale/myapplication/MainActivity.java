@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     Button btnEnviar;
     Channel chatChannel;
     Subscription subscription;
+    boolean isConnected = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -39,7 +40,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         setupConection();
-
 
         statusDraw = (ImageView) findViewById(R.id.statusdraw);
         edtMensagem = (EditText) findViewById(R.id.edtMensagem);
@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 String sendText = edtMensagem.getText().toString().trim();
-                if (sendText.length() > 0){
+                if (sendText.length() > 0 && isConnected){
 
                     JsonObject userValues = new JsonObject();
                     userValues.addProperty("content", sendText);
@@ -86,40 +86,40 @@ public class MainActivity extends AppCompatActivity {
         subscription = consumer.getSubscriptions().create(chatChannel);
 
         subscription
-                .onConnected(new Subscription.ConnectedCallback() {
-                    @Override
-            public void call() {
-                        Log.i("::CHECK", "onConnected");
-                        altStatus(0);
-                    }
-        }).onRejected(new Subscription.RejectedCallback() {
-            @Override
-            public void call() {
-                Log.i("::CHECK", "RejectedCallback");
-                altStatus(3);
-            }
-        }).onReceived(new Subscription.ReceivedCallback() {
-            @Override
-            public void call(JsonElement data) {
-                Log.i("::CHECK", "onReceived");
-                pre(data.toString());
-                Log.i("::CHECK", data.toString());
-                altStatus(4);
-            }
-        }).onDisconnected(new Subscription.DisconnectedCallback() {
-            @Override
-            public void call() {
-                Log.i("::CHECK", "onDisconnected");
-                altStatus(1);
-            }
-        }).onFailed(new Subscription.FailedCallback() {
-            @Override
-            public void call(ActionCableException e) {
-                Log.i("::CHECK", "onFailed");
-                Log.i("::CHECK", e.getMessage());
-                altStatus(2);
-            }
-        });
+            .onConnected(new Subscription.ConnectedCallback() {
+                @Override
+                public void call() {
+                    Log.i("::CHECK", "onConnected");
+                    altStatus(0);
+                }
+            }).onRejected(new Subscription.RejectedCallback() {
+                @Override
+                public void call() {
+                    Log.i("::CHECK", "RejectedCallback");
+                    altStatus(3);
+                }
+            }).onReceived(new Subscription.ReceivedCallback() {
+                @Override
+                public void call(JsonElement data) {
+                    Log.i("::CHECK", "onReceived");
+                    pre(data.toString());
+                    Log.i("::CHECK", data.toString());
+                    altStatus(4);
+                }
+            }).onDisconnected(new Subscription.DisconnectedCallback() {
+                @Override
+                public void call() {
+                    Log.i("::CHECK", "onDisconnected");
+                    altStatus(1);
+                }
+            }).onFailed(new Subscription.FailedCallback() {
+                @Override
+                public void call(ActionCableException e) {
+                    Log.i("::CHECK", "onFailed");
+                    Log.i("::CHECK", e.getMessage());
+                    altStatus(2);
+                }
+            });
 
         consumer.connect();
     }
@@ -135,14 +135,16 @@ public class MainActivity extends AppCompatActivity {
         }catch (Exception e){
         }
     }
-    public void altStatus(final int i){
 
+    public void altStatus(final int i){
+        isConnected = false;
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 switch (i) {
                     case 0:
                         statusDraw.setImageDrawable(getResources().getDrawable(R.drawable.status_on));
+                        isConnected = true;
                         break;
                     case 1:
                         statusDraw.setImageDrawable(getResources().getDrawable(R.drawable.status_off));
@@ -155,6 +157,7 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     case 4:
                         statusDraw.setImageDrawable(getResources().getDrawable(R.drawable.received_animation));
+                        isConnected = true;
                         break;
                 }
             }
