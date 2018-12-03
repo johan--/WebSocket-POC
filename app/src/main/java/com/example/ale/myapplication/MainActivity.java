@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
     private void setupConection(){
 
         try {
-            uri = new URI("https://donutchat.herokuapp.com/cable");
+            uri = new URI("ws://sockets.nxtstepdsgn.com/cable");
             Log.i("::CHECK", uri.toString());
         }catch (Exception ignored){
         }
@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
 
         Consumer consumer = ActionCable.createConsumer(uri, options);
 
-        chatChannel = new Channel("ChatRoomsChannel");
+        chatChannel = new Channel("MessagesChannel");
         chatChannel.addParam("room_id", "36");
         subscription = consumer.getSubscriptions().create(chatChannel);
 
@@ -128,10 +128,11 @@ public class MainActivity extends AppCompatActivity {
         try {
             JSONObject jsonObj = new JSONObject(result);
             String texto = jsonObj.getString("message");
+            String user = jsonObj.getString("user");
+
             JSONObject jsonObj2 = new JSONObject(texto);
-            int id = jsonObj2.getInt("id");
-            String mess = jsonObj2.getString("content");
-            mostrarTexto(mess, id);
+            String mess = jsonObj2.getString("message");
+            mostrarTexto(mess, user);
         }catch (Exception e){
         }
     }
@@ -165,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void mostrarTexto(final String mens, final int id){
+    public void mostrarTexto(final String mens, final String user){
 
         runOnUiThread(new Runnable() {
             @Override
@@ -178,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
                 insertText.setLayoutParams(params);
                 insertText.setText(mens);
                 insertText.setTextSize(18);
-                insertText.setId(id);
+//                insertText.setId(user);
                 insertText.setPadding(20, 20, 20, 20);
 
                 linearLayout.addView(insertText);
