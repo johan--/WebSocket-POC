@@ -29,6 +29,8 @@ public class MainActivity extends AppCompatActivity {
     URI uri = null;
     ImageView statusDraw;
     EditText edtMensagem;
+    TextView tvOutput;
+
     Button btnEnviar;
     Channel chatChannel;
     Subscription subscription;
@@ -45,6 +47,8 @@ public class MainActivity extends AppCompatActivity {
         edtMensagem = (EditText) findViewById(R.id.edtMensagem);
         btnEnviar = (Button) findViewById(R.id.btnEnviar);
 
+        tvOutput = findViewById(R.id.output);
+
         btnEnviar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -52,8 +56,8 @@ public class MainActivity extends AppCompatActivity {
                 if (sendText.length() > 0 && isConnected){
 
                     JsonObject userValues = new JsonObject();
-                    userValues.addProperty("content", sendText);
-                    userValues.addProperty("room_id", "36");
+                    userValues.addProperty("message", sendText);
+                    userValues.addProperty("user", "sue.soap");
 
                     subscription.perform("send_message", userValues);
                     edtMensagem.setText("");
@@ -126,6 +130,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void pre(String result){
         try {
+
+            output("Tx: " + result);
+
             JSONObject jsonObj = new JSONObject(result);
             String texto = jsonObj.getString("message");
             String user = jsonObj.getString("user");
@@ -183,6 +190,16 @@ public class MainActivity extends AppCompatActivity {
                 insertText.setPadding(20, 20, 20, 20);
 
                 linearLayout.addView(insertText);
+            }
+        });
+    }
+
+    private void output(final String txt) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Log.d("websocketchat", txt);
+                tvOutput.setText(tvOutput.getText().toString() + "\n\n" + txt);
             }
         });
     }
